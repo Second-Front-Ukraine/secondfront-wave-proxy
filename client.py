@@ -14,6 +14,29 @@ BUSINESS_QEURY = gql("""query($businessId: ID!) {
   }
 }""")
 
+GET_INVOICE_QUERY = gql("""query($businessId: ID!, $invoiceId: ID!) {
+  business(id: $businessId) {
+    id
+    invoice(id: $invoiceId) {
+      id
+      viewUrl
+      status
+      amountDue {
+        raw
+        value
+      }
+      amountPaid {
+        raw
+        value
+      }
+      total {
+        raw
+        value
+      }
+    }
+  }
+}""")
+
 INVOICES_QUERY = gql("""query($businessId: ID!, $page: Int!, $slug: String!) {
   business(id: $businessId) {
     id
@@ -220,6 +243,16 @@ class WaveClient:
             page += 1
         
         return invoices
+      
+    def get_invoice(self, invoice_id):
+      response = self.client.execute(GET_INVOICE_QUERY, variable_values={
+        'businessId': self.business_id,
+        'invoiceId': invoice_id
+      })
+      if 'errors' in response:
+        return None
+      
+      return response['business']['invoice']
       
     def get_customer(self, email, name):
         """ Get customer by email and name. Must match exactly or none at all. """

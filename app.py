@@ -15,7 +15,7 @@ def campaign(slug: str):
     return data, 200
 
 @app.route('/tab', methods=["POST"])
-def tab():
+def create_tab():
     service = CampaignService()
     if request.method == "POST":
         try:
@@ -24,3 +24,14 @@ def tab():
             return {'error': str(e)}, 400
 
         return data, 201
+
+@app.route('/tab/<tab_id>', methods=["GET"])
+def get_tab(tab_id):
+    service = CampaignService()
+    if request.method == "GET":
+        try:
+            data = service.get_tab(tab_id)
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+        return data, 200
