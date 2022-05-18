@@ -115,9 +115,16 @@ class CampaignService:
             return {
                 'tab_id': invoice['id'],
                 'url': invoice['viewUrl'],
+                'paid': False,
             }
     
-    def get_tab(self):
-        pass
+    def get_tab(self, tab_id):
+        invoice = self.wave.get_invoice(tab_id)
+
+        return {
+            'tab_id': invoice['id'],
+            'url': invoice['viewUrl'],
+            'paid': invoice['status'] == 'PAID'
+        }
 
 
