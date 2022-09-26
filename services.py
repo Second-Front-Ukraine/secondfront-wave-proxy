@@ -34,11 +34,14 @@ class CampaignService:
     def create_tab(
         self,
         campaign_slug: str,
-        amount: int,
+        amount: int = 0,
         email: str = '',
         name: str = '',
         comment: str = '',
         yes_to_updates: bool = False,
+        shipping_details: dict[str, str] = None,
+        products: dict[str, dict[str, str]] = None,
+
     ):
         # Get template Invoice
         try:
@@ -85,6 +88,17 @@ class CampaignService:
             customer = self.wave.create_customer('', 'Good Samarithan')
         
         # Create Invoice
+        items = [{
+            'productId': template_invoice['items'][0]['product']['id'],
+            'description': template_invoice['items'][0]['description'],
+            'quantity': "1",
+            'unitPrice': str(int(amount) / 100),
+        }] if products is None else [{
+            'productId': p_id,
+            'quantity': str(p.get('quantity', 1)),
+            'unitPrice': str(int(p['unitPrice']) / 100)
+        } for p_id, p in products.items() if p.get('quantity', 1) > 0]
+
         create_invoice_input = {
             'customer_id': customer['id'],
             'title': template_invoice['title'],
@@ -102,12 +116,7 @@ class CampaignService:
             'hide_price': template_invoice['hidePrice'],
             'hide_amount': template_invoice['hideAmount'],
             'require_tos': template_invoice['requireTermsOfServiceAgreement'],
-            'items': [{
-                'productId': template_invoice['items'][0]['product']['id'],
-                'description': template_invoice['items'][0]['description'],
-                'quantity': "1",
-                'unitPrice': str(int(amount) / 100),
-            }]
+            'items': items,
         }
         invoice = self.wave.create_invoice(**create_invoice_input)
 

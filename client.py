@@ -283,7 +283,7 @@ class WaveClient:
             if customer['name'] == name and customer['email'] == email:
                 return customer
 
-    def create_customer(self, email, name):
+    def create_customer(self, email, name, shipping_details=None):
         """
         type CustomerCreateInput {
             businessId: ID!
@@ -309,6 +309,21 @@ class WaveClient:
             'email': email or '',
             'internalNotes': "Auto-created using wave-proxy",
         }
+        if shipping_details:
+          customer_create_input['shippingDetails'] = {
+              'name': name or email,
+              'phone': shipping_details.get('phone', ''),
+              'address': {
+                  'addressLine1': shipping_details['addressLine1'],
+                  'addressLine2': shipping_details['addressLine2'],
+                  'city': shipping_details['city'],
+                  'provinceCode': shipping_details['provinceCode'],
+                  'countryCode': shipping_details['countryCode'],
+                  'postalCode': shipping_details['postalCode'],
+              }
+          }
+
+
 
         response = self.client.execute(MUTATION_CUSTOMER_CREATE, variable_values=customer_create_input)
         if response['customerCreate']['didSucceed']:
