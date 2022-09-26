@@ -74,18 +74,18 @@ class CampaignService:
             }
         
         customer = None
-        if email or name:
+        if (email or name) and shipping_details is None:  # Looking up by address as well is asking for so many assertions, best to create new customer from the get go.
             # Lookup customer by email and name
             customer = self.wave.get_customer(email, name)
         if customer is None and (name or email):
             # If lookup failed, create with given email and name
-            customer = self.wave.create_customer(email, name)
+            customer = self.wave.create_customer(email, name, shipping_details=shipping_details)
         if customer is None and template_invoice.get('customer', {}).get('id'):
             # If email or name not given, then use the customer from the template
             customer = template_invoice['customer']
         if customer is None:
             # If template does not exist, then create a new customer with generic name
-            customer = self.wave.create_customer('', 'Good Samarithan')
+            customer = self.wave.create_customer('', 'Good Samarithan', shipping_details=shipping_details)
         
         # Create Invoice
         items = [{
