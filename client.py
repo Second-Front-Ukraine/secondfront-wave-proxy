@@ -310,17 +310,19 @@ class WaveClient:
             'internalNotes': "Auto-created using wave-proxy",
         }
         if shipping_details:
+          address = {
+              'addressLine1': shipping_details['addressLine1'],
+              'addressLine2': shipping_details['addressLine2'],
+              'city': shipping_details['city'],
+              'provinceCode': shipping_details['provinceCode'],
+              'countryCode': shipping_details['countryCode'],
+              'postalCode': shipping_details['postalCode'],
+          }
+          customer_create_input['address'] = address
           customer_create_input['shippingDetails'] = {
               'name': name or email,
               'phone': shipping_details.get('phone', ''),
-              'address': {
-                  'addressLine1': shipping_details['addressLine1'],
-                  'addressLine2': shipping_details['addressLine2'],
-                  'city': shipping_details['city'],
-                  'provinceCode': shipping_details['provinceCode'],
-                  'countryCode': shipping_details['countryCode'],
-                  'postalCode': shipping_details['postalCode'],
-              }
+              'address': address,
           }
 
 
