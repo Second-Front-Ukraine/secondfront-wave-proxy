@@ -268,6 +268,10 @@ MUTATION_INVOICE_CREATE = gql("""mutation CreateInvoice(
 }""")
 
 
+class CustomerCreateException(Exception):
+    pass
+
+
 class WaveClient:
     """
     Client for Wave GraphQL API.
@@ -385,6 +389,8 @@ class WaveClient:
         response = self.client.execute(mut, variable_values=customer_create_input)
         if response['customerCreate']['didSucceed']:
             return response['customerCreate']['customer']
+        else:
+          raise CustomerCreateException(response['customerCreate']['inputErrors']['message'])
     
     def create_invoice(
         self,
