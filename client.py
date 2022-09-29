@@ -379,7 +379,7 @@ class WaveClient:
               'countryCode': shipping_details['countryCode'],
               'postalCode': shipping_details['postalCode'],
           })
-          customer_create_input['phone'] = shipping_details.get('phone', ''),
+          customer_create_input['phone'] = shipping_details.get('phone', '')
           mut = MUTATION_CUSTOMER_CREATE_WITH_ADDRESS
 
         response = self.client.execute(mut, variable_values=customer_create_input)
