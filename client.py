@@ -130,8 +130,34 @@ ALL_CUSTOMERS = gql("""query($businessId: ID!, $page: Int!) {
   }
 }""")
 
-
 MUTATION_CUSTOMER_CREATE = gql("""mutation CreateCustomer(
+  $businessId: ID!,
+  $email: String,
+  $name: String!,
+  $notes: String,
+) {
+  customerCreate(
+    input: {
+      businessId: $businessId,
+      name: $name,
+      email: $email,
+      internalNotes: $notes,
+    }
+  ) {
+    customer {
+      id
+    }
+    didSucceed
+    inputErrors {
+      path
+      message
+      code
+    }
+  }
+}""")
+
+
+MUTATION_CUSTOMER_CREATE_WITH_ADDRESS = gql("""mutation CreateCustomer(
   $businessId: ID!,
   $email: String,
   $name: String!,
@@ -343,6 +369,7 @@ class WaveClient:
             'email': email or '',
             'internalNotes': "Auto-created using wave-proxy",
         }
+        mut = MUTATION_CUSTOMER_CREATE
         if shipping_details:
           customer_create_input.update({
               'addressLine1': shipping_details['addressLine1'],
@@ -353,8 +380,9 @@ class WaveClient:
               'postalCode': shipping_details['postalCode'],
           })
           customer_create_input['phone'] = shipping_details.get('phone', ''),
+          mut = MUTATION_CUSTOMER_CREATE_WITH_ADDRESS
 
-        response = self.client.execute(MUTATION_CUSTOMER_CREATE, variable_values=customer_create_input)
+        response = self.client.execute(mut, variable_values=customer_create_input)
         if response['customerCreate']['didSucceed']:
             return response['customerCreate']['customer']
     
