@@ -131,13 +131,46 @@ ALL_CUSTOMERS = gql("""query($businessId: ID!, $page: Int!) {
 }""")
 
 
-MUTATION_CUSTOMER_CREATE = gql("""mutation CreateCustomer($businessId: ID!, $email: String, $name: String!, $notes: String) {
+MUTATION_CUSTOMER_CREATE = gql("""mutation CreateCustomer(
+  $businessId: ID!,
+  $email: String,
+  $name: String!,
+  $notes: String,
+  $addressLine1: String,
+  $addressLine2: String,
+  $city: String,
+  $provinceCode: String,
+  $countryCode: CountryCode,
+  $postalCode: String,
+  $phone: String
+) {
   customerCreate(
     input: {
       businessId: $businessId,
       name: $name,
       email: $email,
-      internalNotes: $notes
+      phone: $phone,
+      internalNotes: $notes,
+      address: {
+        addressLine1: $addressLine1,
+        addressLine2: $addressLine2,
+        city: $city,
+        provinceCode: $provinceCode,
+        countryCode: $countryCode,
+        postalCode: $postalCode
+      },
+      shippingDetails: {
+        name: $name,
+        address: {
+          addressLine1: $addressLine1,
+          addressLine2: $addressLine2,
+          city: $city,
+          provinceCode: $provinceCode,
+          countryCode: $countryCode,
+          postalCode: $postalCode
+        },
+        phone: $phone
+      }
     }
   ) {
     customer {
@@ -303,6 +336,7 @@ class WaveClient:
             shippingDetails: CustomerShippingDetailsInput
         }
         """
+        shipping_details = shipping_details or {}
         customer_create_input = {
             'businessId': self.business_id,
             'name': name or email,
@@ -310,22 +344,15 @@ class WaveClient:
             'internalNotes': "Auto-created using wave-proxy",
         }
         if shipping_details:
-          address = {
+          customer_create_input.update({
               'addressLine1': shipping_details['addressLine1'],
               'addressLine2': shipping_details['addressLine2'],
               'city': shipping_details['city'],
               'provinceCode': shipping_details['provinceCode'],
               'countryCode': shipping_details['countryCode'],
               'postalCode': shipping_details['postalCode'],
-          }
-          customer_create_input['address'] = address
-          customer_create_input['shippingDetails'] = {
-              'name': name or email,
-              'phone': shipping_details.get('phone', ''),
-              'address': address,
-          }
-
-
+          })
+          customer_create_input['phone'] = shipping_details.get('phone', ''),
 
         response = self.client.execute(MUTATION_CUSTOMER_CREATE, variable_values=customer_create_input)
         if response['customerCreate']['didSucceed']:
