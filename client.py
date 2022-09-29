@@ -390,7 +390,7 @@ class WaveClient:
         if response['customerCreate']['didSucceed']:
             return response['customerCreate']['customer']
         else:
-          raise CustomerCreateException(response['customerCreate']['inputErrors'][0]['message'])
+          raise CustomerCreateException(str(response['customerCreate']['inputErrors']))
     
     def create_invoice(
         self,
