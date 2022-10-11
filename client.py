@@ -37,12 +37,13 @@ GET_INVOICE_QUERY = gql("""query($businessId: ID!, $invoiceId: ID!) {
   }
 }""")
 
-INVOICES_QUERY = gql("""query($businessId: ID!, $page: Int!, $slug: String!) {
+INVOICES_QUERY = gql("""query($businessId: ID!, $page: Int!, $slug: String!, $status: InvoiceStatus!) {
   business(id: $businessId) {
     id
     invoices(
       page: $page,
-      invoiceNumber: $slug
+      invoiceNumber: $slug,
+      status: $status
     ) {
       edges {
         node {
@@ -288,7 +289,7 @@ class WaveClient:
     def get_business_details(self):
         return self.client.execute(BUSINESS_QEURY, variable_values={'businessId': self.business_id})
     
-    def get_invoices_for_slug(self, slug: str):
+    def get_invoices_for_slug(self, slug: str, status: str):
         invoices = []
         page = 1
         while True:
@@ -296,6 +297,7 @@ class WaveClient:
                 'businessId': self.business_id,
                 'page': page,
                 'slug': slug.upper(),
+                'status': status
             })
             invoices.extend(response['business']['invoices']['edges'])
 

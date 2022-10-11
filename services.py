@@ -13,7 +13,7 @@ class CampaignService:
     
     def get_campaign(self, campaign_slug):
         business_details = self.wave.get_business_details()
-        invoices = self.wave.get_invoices_for_slug(campaign_slug)
+        invoices = self.wave.get_invoices_for_slug(campaign_slug, status="PAID")
 
         amount_paid = 0
         amount_unpaid = 0
@@ -45,7 +45,7 @@ class CampaignService:
     ):
         # Get template Invoice
         try:
-            template_invoice = [i['node'] for i in self.wave.get_invoices_for_slug(campaign_slug) if i['node']['invoiceNumber'].lower().endswith('template')][0]
+            template_invoice = [i['node'] for i in self.wave.get_invoices_for_slug(campaign_slug, status="DRAFT") if i['node']['invoiceNumber'].lower().endswith('template')][0]
         except IndexError:
             template_invoice = {
                 'title': 'Donation',
