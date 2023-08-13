@@ -158,7 +158,7 @@ MUTATION_CUSTOMER_CREATE = gql("""mutation CreateCustomer(
 }""")
 
 
-MUTATION_CUSTOMER_CREATE_WITH_ADDRESS = gql("""mutation CreateCustomer(
+MUTATION_CUSTOMER_CREATE_WITH_SHIPPING_ADDRESS = gql("""mutation CreateCustomer(
   $businessId: ID!,
   $email: String,
   $name: String!,
@@ -197,6 +197,49 @@ MUTATION_CUSTOMER_CREATE_WITH_ADDRESS = gql("""mutation CreateCustomer(
           postalCode: $postalCode
         },
         phone: $phone
+      }
+    }
+  ) {
+    customer {
+      id
+    }
+    didSucceed
+    inputErrors {
+      path
+      message
+      code
+    }
+  }
+}""")
+
+
+MUTATION_CUSTOMER_CREATE_WITH_ADDRESS = gql("""mutation CreateCustomer(
+  $businessId: ID!,
+  $email: String,
+  $name: String!,
+  $notes: String,
+  $addressLine1: String,
+  $addressLine2: String,
+  $city: String,
+  $provinceCode: String,
+  $countryCode: CountryCode,
+  $postalCode: String,
+  $phone: String
+) {
+  customerCreate(
+    input: {
+      businessId: $businessId,
+      name: $name,
+      email: $email,
+      phone: $phone,
+      internalNotes: $notes,
+      address: {
+        addressLine1: $addressLine1,
+        addressLine2: $addressLine2,
+        city: $city,
+        provinceCode: $provinceCode,
+        countryCode: $countryCode,
+        postalCode: $postalCode
       }
     }
   ) {
@@ -386,7 +429,8 @@ class WaveClient:
               'postalCode': shipping_details['postalCode'],
           })
           customer_create_input['phone'] = shipping_details.get('phone', '')
-          mut = MUTATION_CUSTOMER_CREATE_WITH_ADDRESS
+          # If address is not full, just create with address without shipping address
+          mut = MUTATION_CUSTOMER_CREATE_WITH_SHIPPING_ADDRESS if shipping_details['addressLine1'] else MUTATION_CUSTOMER_CREATE_WITH_ADDRESS
 
         response = self.client.execute(mut, variable_values=customer_create_input)
         if response['customerCreate']['didSucceed']:
