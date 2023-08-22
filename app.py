@@ -22,6 +22,7 @@ def create_tab():
             kwargs = {**request.get_json()}
             kwargs['user_agent'] = request.headers.get('User-Agent')
             kwargs['ip_address'] = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+            kwargs['referrer'] = kwargs.get('referrer', request.headers.get("Referer"))
             data = service.create_tab(**kwargs)
         except Exception as e:
             return {'error': str(e)}, 400
