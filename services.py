@@ -1,5 +1,7 @@
-from operator import inv
 import random
+
+import boto3
+
 from client import WaveClient
 
 
@@ -10,6 +12,8 @@ class CampaignService:
     
     def __init__(self):
         self.wave = WaveClient()
+        self.dynamodb = boto3.resource('dynamodb')
+        self.attribution_table = self.dynamodb.Table('web-donation-attribution')
     
     def get_campaign(self, campaign_slug):
         business_details = self.wave.get_business_details()
@@ -41,7 +45,7 @@ class CampaignService:
         yes_to_updates: bool = False,
         shipping_details: dict[str, str] = None,
         products: dict[str, dict[str, str]] = None,
-
+        referrer: str = None
     ):
         # Get template Invoice
         try:
@@ -119,6 +123,21 @@ class CampaignService:
             'items': items,
         }
         invoice = self.wave.create_invoice(**create_invoice_input)
+
+        if referrer:
+            try:
+                self.attribution_table.put_item(
+                    Item={
+                            'donation_pk': invoice['id'],
+                            'referrer': referrer,
+                            'campaign_slug': campaign_slug,
+                            # 'input': create_invoice_input,
+                            # 'invoice': invoice,
+                        }
+                    )
+            except Exception as e:
+                print(e)
+                # pass the error to unblock the request. Note, hanging dynamodb puts may still fail the request.
 
         if invoice:
             return {
