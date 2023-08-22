@@ -19,7 +19,10 @@ def create_tab():
     service = CampaignService()
     if request.method == "POST":
         try:
-            data = service.create_tab(**request.get_json())
+            data = service.create_tab(
+                **request.get_json(),
+                ip_address=request.environ.get('HTTP_X_REAL_IP', request.remote_addr),
+            )
         except Exception as e:
             return {'error': str(e)}, 400
 

@@ -45,7 +45,9 @@ class CampaignService:
         yes_to_updates: bool = False,
         shipping_details: dict[str, str] = None,
         products: dict[str, dict[str, str]] = None,
-        referrer: str = None
+        referrer: str = None,
+        user_agent: str = None,
+        ip_address: str = None,
     ):
         # Get template Invoice
         try:
@@ -129,10 +131,11 @@ class CampaignService:
                 self.attribution_table.put_item(
                     Item={
                             'donation_pk': invoice['id'],
-                            'referrer': referrer,
+                            'donation_url': invoice['viewUrl'],
                             'campaign_slug': campaign_slug,
-                            # 'input': create_invoice_input,
-                            # 'invoice': invoice,
+                            'referrer': referrer,
+                            'user_agent': user_agent,
+                            'ip_address': ip_address,
                         }
                     )
             except Exception as e:
