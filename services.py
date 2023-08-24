@@ -1,4 +1,5 @@
 import random
+import base64
 
 import boto3
 
@@ -13,7 +14,7 @@ class CampaignService:
     def __init__(self):
         self.wave = WaveClient()
         self.dynamodb = boto3.resource('dynamodb')
-        self.attribution_table = self.dynamodb.Table('web-donation-attribution')
+        self.tracking_table = self.dynamodb.Table('donation-tracking')
     
     def get_campaign(self, campaign_slug):
         business_details = self.wave.get_business_details()
@@ -128,9 +129,22 @@ class CampaignService:
 
         if referrer:
             try:
-                self.attribution_table.put_item(
+                def decode_invoice_id(value):
+                    try:
+                        s = base64.decode(value).decode()
+                        parts = s.split(';')
+
+                        business_id = parts[0].split(':')[1].strip()
+                        invoice_id = parts[1].split(':')[1].strip()
+                    except Exception:
+                        return 'unknown', value
+
+                    return business_id, invoice_id
+                b_id, d_id = decode_invoice_id(invoice['id'])
+                self.tracking_table.put_item(
                     Item={
-                            'donation_pk': invoice['id'],
+                            'business_id': b_id,
+                            'donation_id': d_id,
                             'donation_url': invoice['viewUrl'],
                             'campaign_slug': campaign_slug,
                             'referrer': referrer,
