@@ -131,7 +131,7 @@ class CampaignService:
             try:
                 def decode_invoice_id(value):
                     try:
-                        s = base64.decode(value).decode()
+                        s = base64.b64decode(value).decode()
                         parts = s.split(';')
 
                         business_id = parts[0].split(':')[1].strip()
