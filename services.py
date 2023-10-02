@@ -32,10 +32,10 @@ class CampaignService:
             amount_unpaid += invoice['node']['amountDue']['raw']
             if detailed:
                 invoice_number = invoice['node']['invoiceNumber']
-                m = re.match(r'^({})-?(.*)-\d+$'.format(campaign_slug), invoice_number)
+                m = re.match(r'^({})-?(.+)-\d+$'.format(campaign_slug), invoice_number)
                 if m:
                     a, b = m.groups()
-                    breakdown[f"{a}-{b}"] += invoice['node']['amountPaid']['raw']
+                    breakdown[f"{a.strip('-')}-{b.strip('-')}"] += invoice['node']['amountPaid']['raw']
                 else:
                     breakdown[campaign_slug] += invoice['node']['amountPaid']['raw']
 
