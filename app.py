@@ -15,7 +15,7 @@ def campaign(slug: str):
     return data, 200
 
 @app.route('/campaign/<slug>/detailed', methods=['GET'])
-def campaign(slug: str):
+def campaign_detailed(slug: str):
     service = CampaignService()
     data = service.get_campaign(slug, detailed=True)
 
