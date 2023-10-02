@@ -1,4 +1,6 @@
+import re
 import random
+from collections import defaultdict
 import base64
 
 import boto3
@@ -16,18 +18,28 @@ class CampaignService:
         self.dynamodb = boto3.resource('dynamodb')
         self.tracking_table = self.dynamodb.Table('donation-tracking')
     
-    def get_campaign(self, campaign_slug):
+    def get_campaign(self, campaign_slug, detailed=False):
         business_details = self.wave.get_business_details()
         invoices = self.wave.get_invoices_for_slug(campaign_slug, status="PAID")
 
         amount_paid = 0
         amount_unpaid = 0
 
+        breakdown = defaultdict(int)
+
         for invoice in invoices:
             amount_paid += invoice['node']['amountPaid']['raw']
             amount_unpaid += invoice['node']['amountDue']['raw']
+            if detailed:
+                invoice_number = invoice['node']['invoiceNumber']
+                m = re.match(r'^({})-?(.*)-\d+$'.format(campaign_slug), invoice_number)
+                if m:
+                    a, b = m.groups()
+                    breakdown[f"{a}-{b}"] += invoice['node']['amountPaid']['raw']
+                else:
+                    breakdown[campaign_slug] += invoice['node']['amountPaid']['raw']
 
-        return {
+        result = {
             'business': business_details,
             'campaign': {
                 'slug': campaign_slug,
@@ -35,6 +47,10 @@ class CampaignService:
                 'unpaid': amount_unpaid,
             }
         }
+        if detailed:
+            result['campaign']['breakdown'] = breakdown
+
+        return result
     
     def create_tab(
         self,
@@ -171,5 +187,3 @@ class CampaignService:
             'url': invoice['viewUrl'],
             'paid': invoice['status'] == 'PAID'
         }
-
-

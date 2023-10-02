@@ -10,7 +10,14 @@ CORS(app)
 @app.route('/campaign/<slug>', methods=['GET'])
 def campaign(slug: str):
     service = CampaignService()
-    data = service.get_campaign(slug)
+    data = service.get_campaign(slug, detailed=False)
+
+    return data, 200
+
+@app.route('/campaign/<slug>/detailed', methods=['GET'])
+def campaign(slug: str):
+    service = CampaignService()
+    data = service.get_campaign(slug, detailed=True)
 
     return data, 200
 
