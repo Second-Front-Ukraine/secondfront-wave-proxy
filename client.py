@@ -479,8 +479,8 @@ class WaveClient:
             'requireTOS': require_tos,
             'items': items
         }
+        print("CREATING INVOICE...")
         response = self.client.execute(MUTATION_INVOICE_CREATE, variable_values=invoice_create_input)
-        if 'invoice' not in response['invoiceCreate']:
-            print("MISSING INVOICE", response['invoiceCreate'])
+        print("INVOICE RESPONSE: ", response['invoiceCreate'])
         if response['invoiceCreate']['didSucceed']:
             return response['invoiceCreate']['invoice']
