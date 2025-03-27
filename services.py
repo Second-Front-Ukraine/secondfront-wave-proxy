@@ -75,7 +75,7 @@ class CampaignService:
             if campaign_slug.startswith("IH"):
                 print("FETCHING DEFAULT TEMPLATE FOR IRON HEARTS...")
                 try:
-                    template_invoice = self.wave.get_invoice("2204806364373496752")
+                    template_invoice = self.wave.get_invoice("QnVzaW5lc3M6YWU4YTgxYjYtZWI4OS00MDRhLWExNzgtYzJmYmM4OTc2ODIzO0ludm9pY2U6MjIwNDgwNjM2NDM3MzQ5Njc1Mg==")
                 except Exception as e:
                     print("ERROR", e)
         if template_invoice is None:
