@@ -76,6 +76,7 @@ class CampaignService:
                 print("FETCHING DEFAULT TEMPLATE FOR IRON HEARTS...")
                 try:
                     template_invoice = self.wave.get_invoice("QnVzaW5lc3M6YWU4YTgxYjYtZWI4OS00MDRhLWExNzgtYzJmYmM4OTc2ODIzO0ludm9pY2U6MjIwNDgwNjM2NDM3MzQ5Njc1Mg==")
+                    print("FOUND IRON HEARTS TEMPLATE INVOICE for ", campaign_slug)
                 except Exception as e:
                     print("ERROR", e)
         if template_invoice is None:
@@ -151,7 +152,11 @@ class CampaignService:
             'require_tos': template_invoice['requireTermsOfServiceAgreement'],
             'items': items,
         }
-        invoice = self.wave.create_invoice(**create_invoice_input)
+        try:
+            invoice = self.wave.create_invoice(**create_invoice_input)
+        except Exception as e:
+            print("ERROR", e)
+            raise
 
         if referrer:
             try:
