@@ -67,9 +67,19 @@ class CampaignService:
         ip_address: str = None,
     ):
         # Get template Invoice
+        template_invoice = None
         try:
             template_invoice = [i['node'] for i in self.wave.get_invoices_for_slug(campaign_slug, status="DRAFT") if i['node']['invoiceNumber'].lower().endswith('template')][0]
+            print("FOUND TEMPLATE INVOICE for ", campaign_slug)
         except IndexError:
+            if campaign_slug.startswith("IH"):
+                print("FETCHING DEFAULT TEMPLATE FOR IRON HEARTS...")
+                try:
+                    template_invoice = self.wave.get_invoice("2204806364373496752")
+                except Exception as e:
+                    print("ERROR": e)
+        if template_invoice is None:
+            print("FALLING BACK TO DEFAULT HARD-CODED TEMPLATE")
             template_invoice = {
                 'title': 'Donation',
                 'subhead': "",
