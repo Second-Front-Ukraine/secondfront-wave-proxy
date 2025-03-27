@@ -77,7 +77,7 @@ class CampaignService:
                 try:
                     template_invoice = self.wave.get_invoice("2204806364373496752")
                 except Exception as e:
-                    print("ERROR": e)
+                    print("ERROR", e)
         if template_invoice is None:
             print("FALLING BACK TO DEFAULT HARD-CODED TEMPLATE")
             template_invoice = {
